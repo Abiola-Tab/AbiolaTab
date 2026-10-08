@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: standout-bc
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.14
+      - key: FLASK_ENV
+        value: production
+      - key: FLASK_SECRET_KEY
+        generateValue: true
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: COHERE_API_KEY
+        sync: false
+      - key: COHERE_MODEL
+        value: command-a-03-2025
+      - key: DATABASE_URL
+        sync: false

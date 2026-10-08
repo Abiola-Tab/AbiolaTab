@@ -41,6 +41,16 @@ testem.log
 .DS_Store
 Thumbs.db
 
+# Python / Flask
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+instance/*.db
+.env
+.env.*
+!.env.example
+
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
 

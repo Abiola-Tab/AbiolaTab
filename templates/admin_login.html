@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <meta name="theme-color" content="#252a30">
+  <title>Administrator sign in | STANDOUT B&amp;C</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body class="admin-body">
+  <a class="skip-link" href="#login-panel">Skip to sign in</a>
+  <main class="login-page">
+    <section class="login-aside" aria-label="STANDOUT B&C">
+      <a href="/" aria-label="Return to STANDOUT B&C website"><img class="login-logo" src="{{ url_for('static', filename='images/standout-logo.jpeg') }}" alt="STANDOUT Building & Construction"></a>
+      <div class="login-message">
+        <span class="eyebrow">Management workspace</span>
+        <h1 class="display">Keep every conversation moving.</h1>
+        <p>A considered place for enquiries, follow-ups and the people planning their next build with STANDOUT.</p>
+      </div>
+      <div class="login-location">Nairobi · Building &amp; construction</div>
+    </section>
+    <section class="login-panel" id="login-panel">
+      <div class="login-form-wrap">
+        <span class="eyebrow">Secure access</span>
+        <h2 class="display">Welcome back.</h2>
+        <p>Sign in to manage the STANDOUT B&amp;C inbox.</p>
+        {% if error %}<p class="login-error" role="alert">{{ error }}</p>{% endif %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}{% for category, message in messages %}<p class="login-error" role="alert">{{ message }}</p>{% endfor %}{% endif %}
+        {% endwith %}
+        <form class="login-form" method="post" action="/admin/login">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="field"><label for="username">Username</label><input id="username" name="username" autocomplete="username" required autofocus></div>
+          <div class="field"><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" required></div>
+          <button class="button button-dark" type="submit">Sign in <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></button>
+        </form>
+        <a class="login-return" href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M19 12H5m7 7-7-7 7-7"/></svg> Return to the public site</a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

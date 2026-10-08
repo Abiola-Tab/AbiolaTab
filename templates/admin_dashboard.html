@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <meta name="theme-color" content="#252a30">
+  <title>Management inbox | STANDOUT B&amp;C</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body class="admin-body">
+  <a class="skip-link" href="#conversation-list">Skip to conversations</a>
+  <header class="admin-header">
+    <a class="admin-brand" href="/admin" aria-label="STANDOUT management inbox">
+      <img src="{{ url_for('static', filename='images/standout-logo.jpeg') }}" alt="STANDOUT Building & Construction">
+      <span>Management inbox</span>
+    </a>
+    <div class="admin-header-right"><a href="/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M14 3h7v7M10 14 21 3"/><path d="M19 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6"/></svg>View website</a><a href="/admin/logout" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3"/><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/></svg>Sign out</a></div>
+  </header>
+  <main class="admin-app">
+    <aside class="inbox-sidebar">
+      <div class="inbox-top">
+        <div class="inbox-topline"><h1 class="display">Inbox</h1><span class="inbox-count">{{ conversations|length if conversations else 0 }}</span></div>
+        <p>Project conversations with STANDOUT B&amp;C</p>
+        <div class="inbox-filter" role="group" aria-label="Filter conversations">
+          <button type="button" class="filter-chip active" data-filter="all" aria-pressed="true">All</button>
+          <button type="button" class="filter-chip" data-filter="open" aria-pressed="false">Open</button>
+          <button type="button" class="filter-chip" data-filter="resolved" aria-pressed="false">Resolved</button>
+        </div>
+      </div>
+      <nav class="conversation-list" id="conversation-list" aria-label="Conversations">
+        {% if conversations %}
+          {% for conversation in conversations %}
+            {% set item_token = conversation.token if conversation.token is defined else conversation['token'] %}
+            {% set item_name = conversation.name if conversation.name is defined else (conversation['name'] if 'name' in conversation else 'Website visitor') %}
+            {% set item_status = conversation.status if conversation.status is defined else (conversation['status'] if 'status' in conversation else 'open') %}
+            {% set item_preview = conversation.last_message if conversation.last_message is defined else (conversation['last_message'] if 'last_message' in conversation else '') %}
+            {% set item_email = conversation.email if conversation.email is defined else (conversation['email'] if 'email' in conversation else '') %}
+            <a class="conversation-item{% if selected_conversation and selected_conversation.token is defined and selected_conversation.token == item_token %} selected{% endif %}"
+               href="/admin/conversations/{{ item_token }}"
+               data-status="{{ 'resolved' if item_status == 'resolved' else 'open' }}"
+               aria-current="{% if selected_conversation and selected_conversation.token is defined and selected_conversation.token == item_token %}page{% else %}false{% endif %}">
+              <div class="conversation-item-head"><strong>{{ item_name }}</strong><time>{% if conversation.updated_at is defined %}{{ conversation.updated_at }}{% elif conversation.created_at is defined %}{{ conversation.created_at }}{% endif %}</time></div>
+              <p>{{ item_preview or 'No message preview available' }}</p>
+              <div class="conversation-item-foot"><span class="status-pill{% if item_status == 'resolved' %} resolved{% endif %}">{{ item_status }}</span><span class="email-preview">{{ item_email }}</span></div>
+            </a>
+          {% endfor %}
+        {% else %}
+          <div class="inbox-empty">
+            <div class="inbox-empty-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="m4 7 8 6 8-6"/></svg></div>
+            <strong>Your inbox is clear.</strong>
+            <p>New project enquiries sent through the website will appear here.</p>
+          </div>
+        {% endif %}
+      </nav>
+    </aside>
+    <section class="thread" aria-label="Selected conversation">
+      {% if selected_conversation %}
+        {% set selected_token = selected_conversation.token if selected_conversation.token is defined else selected_conversation['token'] %}
+        {% set selected_name = selected_conversation.name if selected_conversation.name is defined else (selected_conversation['name'] if 'name' in selected_conversation else 'Website visitor') %}
+        {% set selected_email = selected_conversation.email if selected_conversation.email is defined else (selected_conversation['email'] if 'email' in selected_conversation else '') %}
+        {% set selected_phone = selected_conversation.phone if selected_conversation.phone is defined else (selected_conversation['phone'] if 'phone' in selected_conversation else '') %}
+        {% set selected_status = selected_conversation.status if selected_conversation.status is defined else (selected_conversation['status'] if 'status' in selected_conversation else 'open') %}
+        <div class="thread-head">
+          <div class="thread-person">
+            <div class="thread-avatar" aria-hidden="true">{{ selected_name[:1]|upper }}</div>
+            <div><h2>{{ selected_name }}</h2><p>{{ selected_email }}{% if selected_phone %} · {{ selected_phone }}{% endif %}</p></div>
+          </div>
+          <div class="thread-actions">
+            {% if selected_status == 'resolved' %}
+              <form method="post" action="/admin/conversations/{{ selected_token }}/reopen">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="admin-button" type="submit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.6-6.4L3 8"/><path d="M3 3v5h5"/></svg>Reopen</button>
+              </form>
+            {% else %}
+              <form method="post" action="/admin/conversations/{{ selected_token }}/resolve" data-confirm="Mark this conversation resolved?">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="admin-button resolve" type="submit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>Resolve</button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+        <div class="thread-body" id="thread-body" data-conversation-token="{{ selected_token }}" aria-live="polite">
+          <div class="thread-date"><span>Conversation</span></div>
+          {% for message in selected_messages %}
+            {% set message_sender = message.sender if message.sender is defined else message['sender'] %}
+            {% set message_body = message.body if message.body is defined else message['body'] %}
+            {% set message_time = message.created_at if message.created_at is defined else (message['created_at'] if 'created_at' in message else '') %}
+            <article class="message{% if message_sender in ['admin','management','owner'] %} admin{% else %} visitor{% endif %}" data-message-id="{{ message.id }}">
+              <div class="message-meta"><span>{% if message_sender in ['admin','management','owner'] %}STANDOUT B&amp;C{% else %}{{ selected_name }}{% endif %}</span><time>{{ message_time }}</time></div>
+              <div class="message-box">{{ message_body }}</div>
+            </article>
+          {% else %}
+            <div class="thread-empty">
+              <div class="thread-empty-symbol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="m4 7 8 6 8-6"/></svg></div>
+              <h2>No messages yet</h2><p>Replies to this conversation will appear here.</p>
+            </div>
+          {% endfor %}
+        </div>
+        {% if selected_status == 'resolved' %}
+          <div class="resolved-banner">This conversation is marked resolved. Reopen it to send a reply.</div>
+        {% else %}
+          <div class="reply-box">
+            <form method="post" action="/admin/conversations/{{ selected_token }}/reply" id="reply-form">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <label for="reply-message" class="sr-only">Write a reply</label>
+              <textarea id="reply-message" name="message" required maxlength="3000" placeholder="Write a clear, helpful reply…"></textarea>
+              <button class="button button-dark" type="submit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg><span>Send reply</span></button>
+            </form>
+          </div>
+        {% endif %}
+      {% else %}
+        <div class="thread-empty">
+          <div class="thread-empty-symbol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="m4 7 8 6 8-6"/></svg></div>
+          <h2>Select a conversation.</h2>
+          <p>Choose an enquiry from the inbox to read the details and respond to the visitor.</p>
+        </div>
+      {% endif %}
+    </section>
+  </main>
+  <script src="{{ url_for('static', filename='js/admin.js') }}" defer></script>
+</body>
+</html>

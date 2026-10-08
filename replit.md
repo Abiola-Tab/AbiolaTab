@@ -1,9 +1,15 @@
-# [Project name]
+# STANDOUT B&C Website
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Flask construction-company website for STANDOUT B&C with a Cohere assistant and a private management-message inbox.
 
 ## Run & Operate
 
+- `python app.py` — run the Flask website on port 5000
+- `pip install -r requirements.txt` — install Python dependencies
+- Admin login: `/admin/login`; local starter login is `admin` / `admin123`
+- Set `COHERE_API_KEY` as a Replit secret to enable Cohere responses
+- `DATABASE_URL` enables durable PostgreSQL conversation storage; local development uses SQLite
+- Render build/start: `pip install -r requirements.txt` / `gunicorn app:app`
 - `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
@@ -22,23 +28,33 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `app.py` — Flask routes, management conversation API, admin login, Cohere requests, and SQLAlchemy models
+- `templates/` — public, admin, and error pages
+- `static/` — styles, browser scripts, and the supplied company logo
+- `render.yaml`, `Procfile`, `requirements.txt` — Render and Python deployment setup
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Management messages use SQLAlchemy, with SQLite for local preview and PostgreSQL support through `DATABASE_URL`.
+- The Cohere key stays on the server; no secret is sent to the browser.
+- Render's free filesystem is temporary, so production conversation retention needs a persistent database.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Company information and services using STANDOUT B&C's supplied logo and company details
+- Visitor AI assistant and direct message threads with management
+- Administrator sign-in and private inbox for replying to and resolving conversations
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- Use Flask with a root-level `app.py`, plus Python, HTML, JavaScript, and CSS; prepare deployment for Render.
+- Use Cohere for the AI chat. Do not use OpenAI.
+- Keep the site preview available during development.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- Change the requested local starter password before exposing the site; production startup rejects `admin123`.
+- Add a Render PostgreSQL `DATABASE_URL` before handling real production conversations, or the free instance's SQLite data may be lost.
 
 ## Pointers
 

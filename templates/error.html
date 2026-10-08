@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{{ code }} | STANDOUT B&amp;C</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  </head>
+  <body class="error-page">
+    <main class="error-card">
+      <a class="error-brand" href="{{ url_for('home') }}">STANDOUT <span>B&amp;C</span></a>
+      <p class="eyebrow">Error {{ code }}</p>
+      <h1>{{ message }}</h1>
+      <a class="button button-primary" href="{{ url_for('home') }}">Back to the website</a>
+    </main>
+  </body>
+</html>
